@@ -1,0 +1,26 @@
+language: go
+
+go:
+  - 1.7
+  - 1.6
+  - 1.5.3
+  - 1.4.3
+services:
+  - redis-server
+  - mysql
+  - memcached
+env:
+  - ORM_DRIVER=mysql    ORM_SOURCE="root:@/orm_test?charset=utf8"
+install:
+  - go get github.com/astaxie/beego
+  - go get github.com/beego/bee
+  - go get github.com/go-sql-driver/mysql
+  - go get github.com/bradfitz/gomemcache/memcache
+  - go get github.com/garyburd/redigo/redis
+before_script:
+  - psql --version
+  - sh -c "if [ '$ORM_DRIVER' = 'mysql' ]; then mysql -u root -e 'create database orm_test;'; fi"
+  - sh -c "if [ $(go version) == *1.[5-9]* ]; then go get github.com/golang/lint/golint; golint ./...; fi"
+  - sh -c "if [ $(go version) == *1.[5-9]* ]; then go tool vet .; fi"
+script:
+  - go test -v ./...
